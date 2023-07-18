@@ -1,0 +1,25 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Hello FileManagementController!{% endblock %}
+
+{% block body %}
+<div class="row">   
+    <p>
+        Liste Image {% if imagesCount is defined %} ( {{ imagesCount }} )  {% endif %}| <a href="{{ path('addImage') }}">Ajout Nouveau</a>
+    </p>
+
+
+    {% if message is defined %}
+        <p>{{ message }}</p>
+    {% endif %}
+    <br>
+    {% if images is not empty %}
+        <h2>Liste des images :</h2>
+        <ul>
+            {% for image in images %}
+                <li><a href="{{ path('downloadImage', {'nameImage': image}) }}"> {{ image }} </a>| <a href="{{ path('deleteImage', {'nameImage': image}) }}">Supprimer</a></li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+</div>
+{% endblock %}

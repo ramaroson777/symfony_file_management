@@ -1,0 +1,12 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Hello FileManagementController!{% endblock %}
+
+{% block body %}
+<div class="row">   
+    <div class="col-lg-6"><p><a href="{{ path('listImage') }}">Image</a></p></div>
+    <div class="col-lg-6"><p>Video</p></div>
+    <div class="col-lg-6"><p>Pdf</p></div>
+    <div class="col-lg-6"><p>Random</p></div>
+</div>
+{% endblock %}
