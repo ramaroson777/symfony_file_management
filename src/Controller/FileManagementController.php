@@ -13,6 +13,7 @@ class FileManagementController extends AbstractController
     private $videoExtension = ['mp4', '3gp'];
     private $pdfExtension = ['pdf'];
     private $imageExtension = ['jpg', 'jpeg', 'png', 'gif'];
+    private $randomExtension = ['jpg', 'jpeg', 'png', 'gif','mp4', '3gp','pdf'];
 
     #[Route('/', name: 'acceuil')]
     public function index(): Response
@@ -211,8 +212,6 @@ class FileManagementController extends AbstractController
         return $this->file('pdf/'.$namePdf);
     }
 
-
-
     #[Route('/suppression/pdf/{namePdf}', name: 'deletePdf')]
     public function deletePdf($namePdf): Response
     {
@@ -354,6 +353,114 @@ class FileManagementController extends AbstractController
             'message' => $message,
             'dataVideo' => $dataVideo,
             'videoCount' => $videoCount,
+        ]);
+    }
+
+    #[Route('/ajout/fichier/random', name: 'addRandom')]
+    public function addRandom(Request $request): Response
+    {
+        if ($request->isMethod('POST')) {
+            $file = $request->files->get('file');
+
+            if ($file instanceof UploadedFile) {
+                $fileName = $file->getClientOriginalName();
+                $fileExtension = $file->getClientOriginalExtension();
+                $fileCount = $this->countFile('random',$this->randomExtension);
+                if (in_array($fileExtension, $this->randomExtension)) {
+                    
+                    $imageDirectory = $this->getParameter('kernel.project_dir') . '/public/random';
+                    if (!file_exists($imageDirectory)) {
+                        mkdir($imageDirectory, 0777, true);
+                    }
+
+                    $name = $fileName;
+                    $fileWithPath = $imageDirectory."/".$name;
+                    
+                    if (file_exists($fileWithPath)) {
+                        $message = 'Le fichier existe deja';        
+                        $dataFile = $this->getListFile('random',$this->randomExtension);
+                        $fileCount = $this->countFile('random',$this->randomExtension);
+
+                        return $this->render('file_management/addRandom.html.twig', [
+                            'dataFile' => $dataFile,
+                            'message' => $message,
+                            'fileCount' => $fileCount,
+                        ]);
+                    }else{
+                        $file->move($imageDirectory, $name);
+                        $message = 'Le fichier a été uploadée avec succès.';        
+                        $dataFile = $this->getListFile('random',$this->randomExtension);
+                        $fileCount = $this->countFile('random',$this->randomExtension);
+
+                        return $this->render('file_management/addRandom.html.twig', [
+                            'dataFile' => $dataFile,
+                            'message' => $message,
+                            'fileCount' => $fileCount,
+                        ]);
+                    }
+                    
+                } else {
+                    $message = 'Le fichier sélectionné n\'est pas valide.';  
+
+                    return $this->render('file_management/addRandom.html.twig', [
+                        'message' => $message,
+                        'fileCount' => $fileCount,
+                    ]);
+                }
+
+            }
+        }
+
+        return $this->render('file_management/addRandom.html.twig');
+    }
+
+    #[Route('/list/fichier/random', name: 'listRandom')]
+    public function listRandom(): Response
+    {
+        $fileCount = $this->countFile('random',$this->randomExtension);       
+        $dataFile = $this->getListFile('random',$this->randomExtension);       
+    
+        return $this->render('file_management/listRandom.html.twig', [
+            'dataFile' => $dataFile,
+            'fileCount' => $fileCount,
+        ]);
+        
+    }
+
+    #[Route('/download/fichier/random/{nameFile}', name: 'downloadRandom')]
+    public function downloadFile($nameFile): Response
+    {
+        return $this->file('random/'.$nameFile);
+    }
+
+    #[Route('/suppression/fichier/random/{nameFile}', name: 'deleteRandom')]
+    public function deleteRandom($nameFile): Response
+    {
+        $pdfDirectory = $this->getParameter('kernel.project_dir') . '/public/random';
+        $filePath = $pdfDirectory . '/' . $nameFile;
+
+        if (!file_exists($filePath)) {
+            $message = 'Le fichier n\'existe pas.';  
+            $dataFile = $this->getListFile('random',$this->randomExtension);
+            $fileCount = $this->countFile('random',$this->randomExtension); 
+
+            return $this->render('file_management/listRandom.html.twig', [
+                'message' => $message,
+                'dataFile' => $dataFile,
+                'fileCount' => $fileCount,
+            ]);
+        }
+
+        unlink($filePath);
+
+        $message = 'fichier supprimer avec success.';  
+        $dataFile = $this->getListFile('random',$this->randomExtension);
+        $fileCount = $this->countFile('random',$this->randomExtension); 
+
+        return $this->render('file_management/listRandom.html.twig', [
+            'message' => $message,
+            'dataFile' => $dataFile,
+            'fileCount' => $fileCount,
         ]);
     }
 
