@@ -1,0 +1,27 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Hello FileManagementController!{% endblock %}
+
+{% block body %}
+<div class="row">   
+    <p>
+        Liste fichier {% if fileCount is defined %} ( {{ fileCount }} )  {% endif %} | 
+        <a href="{{ path('addRandom') }}">Ajout Nouveau</a> |
+        <a href="{{ path('acceuil') }}">Page d'acceuil</a>
+    </p>
+
+
+    {% if message is defined %}
+        <p>{{ message }}</p>
+    {% endif %}
+    <br>
+    {% if dataFile is not empty %}
+        <h2>Liste des video :</h2>
+        <ul>
+            {% for file in dataFile %}
+                <li><a href="{{ path('downloadRandom', {'nameFile': file}) }}" > {{ file }} </a>| <a href="{{ path('deleteRandom', {'nameFile': file}) }}" >Supprimer</a></li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+</div>
+{% endblock %}
