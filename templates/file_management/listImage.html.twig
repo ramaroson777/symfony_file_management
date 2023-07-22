@@ -1,11 +1,13 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Hello FileManagementController!{% endblock %}
+{% block title %}Hello FileManagementController!{% endblock %}acceuil
 
 {% block body %}
 <div class="row">   
     <p>
-        Liste Image {% if imagesCount is defined %} ( {{ imagesCount }} )  {% endif %}| <a href="{{ path('addImage') }}">Ajout Nouveau</a>
+        Liste Image {% if imagesCount is defined %} ( {{ imagesCount }} )  {% endif %}| 
+        <a href="{{ path('addImage') }}">Ajout Nouveau</a> | 
+        <a href="{{ path('acceuil') }}">Page d'acceuil</a>
     </p>
 
 

@@ -10,6 +10,10 @@ use Symfony\Component\Routing\Annotation\Route;
 
 class FileManagementController extends AbstractController
 {
+    private $videoExtension = ['mp4', '3gp'];
+    private $pdfExtension = ['pdf'];
+    private $imageExtension = ['jpg', 'jpeg', 'png', 'gif'];
+
     #[Route('/', name: 'acceuil')]
     public function index(): Response
     {
@@ -21,8 +25,8 @@ class FileManagementController extends AbstractController
     #[Route('/list/image', name: 'listImage')]
     public function listImage(): Response
     {
-        $imagesCount = $this->countFileImage();       
-        $images = $this->getListFileImage();       
+        $imagesCount = $this->countFile('images',$this->imageExtension);       
+        $images = $this->getListFile('images',$this->imageExtension);       
         
         return $this->render('file_management/listImage.html.twig', [
             'images' => $images,
@@ -38,11 +42,11 @@ class FileManagementController extends AbstractController
             $file = $request->files->get('file');
 
             if ($file instanceof UploadedFile) {
-                $validExtensions = ['jpg', 'jpeg', 'png', 'gif'];
+                // $validExtensions = ['jpg', 'jpeg', 'png', 'gif'];
                 $fileName = $file->getClientOriginalName();
                 $fileExtension = $file->getClientOriginalExtension();
-                $imagesCount = $this->countFileImage();
-                if (in_array($fileExtension, $validExtensions)) {
+                $imagesCount = $this->countFile('images',$this->imageExtension);
+                if (in_array($fileExtension, $this->imageExtension)) {
                     
                     $imageDirectory = $this->getParameter('kernel.project_dir') . '/public/images';
                     if (!file_exists($imageDirectory)) {
@@ -54,8 +58,8 @@ class FileManagementController extends AbstractController
                     
                     if (file_exists($fileWithPath)) {
                         $message = 'L\'image existe deja';        
-                        $images = $this->getListFileImage();
-                        $imagesCount = $this->countFileImage();
+                        $images = $this->getListFile('images',$this->imageExtension);
+                        $imagesCount = $this->countFile('images',$this->imageExtension);
 
                         return $this->render('file_management/addImage.html.twig', [
                             'images' => $images,
@@ -65,8 +69,8 @@ class FileManagementController extends AbstractController
                     }else{
                         $file->move($imageDirectory, $name);
                         $message = 'L\'image a été uploadée avec succès.';        
-                        $images = $this->getListFileImage();
-                        $imagesCount = $this->countFileImage();
+                        $images = $this->getListFile('images',$this->imageExtension);
+                        $imagesCount = $this->countFile('images',$this->imageExtension);
 
                         return $this->render('file_management/addImage.html.twig', [
                             'images' => $images,
@@ -100,8 +104,8 @@ class FileManagementController extends AbstractController
 
         if (!file_exists($filePath)) {
             $message = 'L\'image demandée n\'existe pas.';  
-            $images = $this->getListFileImage();
-            $imagesCount = $this->countFileImage(); 
+            $images = $this->getListFile('images',$this->imageExtension);
+            $imagesCount = $this->countFile('images',$this->imageExtension); 
 
             return $this->render('file_management/listImage.html.twig', [
                 'message' => $message,
@@ -113,8 +117,8 @@ class FileManagementController extends AbstractController
         unlink($filePath);
 
         $message = 'Image supprimer avec success.';  
-        $images = $this->getListFileImage();
-        $imagesCount = $this->countFileImage(); 
+        $images = $this->getListFile('images',$this->imageExtension);
+        $imagesCount = $this->countFile('images',$this->imageExtension); 
 
         return $this->render('file_management/listImage.html.twig', [
             'message' => $message,
@@ -129,39 +133,266 @@ class FileManagementController extends AbstractController
         return $this->file('image/'.$nameImage);
     }
 
-    public function countFileImage()
+    #[Route('/list/pdf', name: 'listPdf')]
+    public function listPdf(): Response
     {
-        $imageDirectory = $this->getParameter('kernel.project_dir') . '/public/images';
-        $imagesCount = 0;
-
-        if (is_dir($imageDirectory)) {
-            $files = scandir($imageDirectory);
-            foreach ($files as $file) {
-                $filePath = $imageDirectory . '/' . $file;
-                if (is_file($filePath) && in_array(pathinfo($file, PATHINFO_EXTENSION), ['jpg', 'jpeg', 'png', 'gif'])) {
-                    $imagesCount++;
-                }
-            }
-        }
-
-        return $imagesCount;
-    }
-
-    public function getListFileImage()
-    {
-        $imageDirectory = $this->getParameter('kernel.project_dir') . '/public/images';
-        $images = [];
+        $pdfCount = $this->countFile('pdf',$this->pdfExtension);       
+        $dataPdf = $this->getListFile('pdf',$this->pdfExtension);       
         
-        if (is_dir($imageDirectory)) {
-            $files = scandir($imageDirectory);
+        return $this->render('file_management/listPdf.html.twig', [
+            'dataPdf' => $dataPdf,
+            'pdfCount' => $pdfCount,
+        ]);
+        
+    }
+
+    #[Route('/ajout/pdf', name: 'addPdf')]
+    public function addPdf(Request $request): Response
+    {
+        if ($request->isMethod('POST')) {
+            $file = $request->files->get('file');
+
+            if ($file instanceof UploadedFile) {
+                // $validExtensions = ['pdf'];
+                $fileName = $file->getClientOriginalName();
+                $fileExtension = $file->getClientOriginalExtension();
+                $pdfCount = $this->countFile('pdf',$this->pdfExtension); 
+                if (in_array($fileExtension, $this->pdfExtension)) {
+                    
+                    $imageDirectory = $this->getParameter('kernel.project_dir') . '/public/pdf';
+                    if (!file_exists($imageDirectory)) {
+                        mkdir($imageDirectory, 0777, true);
+                    }
+
+                    $name = $fileName;
+                    $fileWithPath = $imageDirectory."/".$name;
+                    
+                    if (file_exists($fileWithPath)) {
+                        $message = 'Le PDF existe deja';        
+                        $dataPdf = $this->getListFile('pdf',$this->pdfExtension);
+                        $pdfCount = $this->countFile('pdf',$this->pdfExtension);
+
+                        return $this->render('file_management/addPdf.html.twig', [
+                            'dataPdf' => $dataPdf,
+                            'message' => $message,
+                            'pdfCount' => $pdfCount,
+                        ]);
+                    }else{
+                        $file->move($imageDirectory, $name);
+                        $message = 'Le PDF a été uploadée avec succès.';        
+                        $dataPdf = $this->getListFile('pdf',$this->pdfExtension);
+                        $pdfCount = $this->countFile('pdf',$this->pdfExtension);
+
+                        return $this->render('file_management/addPdf.html.twig', [
+                            'dataPdf' => $dataPdf,
+                            'message' => $message,
+                            'pdfCount' => $pdfCount,
+                        ]);
+                    }
+                    
+                } else {
+                    $message = 'Le fichier sélectionné n\'est pas un PDF.';  
+
+                    return $this->render('file_management/addImage.html.twig', [
+                        'message' => $message,
+                        'pdfCount' => $pdfCount,
+                    ]);
+                }
+
+            }
+        }
+
+        return $this->render('file_management/addPdf.html.twig');
+    }
+
+    #[Route('/download/pdf/{namePdf}', name: 'downloadPdf')]
+    public function downloadPdf($namePdf): Response
+    {
+        return $this->file('pdf/'.$namePdf);
+    }
+
+
+
+    #[Route('/suppression/pdf/{namePdf}', name: 'deletePdf')]
+    public function deletePdf($namePdf): Response
+    {
+        $images = [];
+
+        $pdfDirectory = $this->getParameter('kernel.project_dir') . '/public/pdf';
+        $filePath = $pdfDirectory . '/' . $namePdf;
+
+        if (!file_exists($filePath)) {
+            $message = 'Le Pdf n\'existe pas.';  
+            $dataPdf = $this->getListFile('pdf',$this->pdfExtension);
+            $pdfCount = $this->countFile('pdf',$this->pdfExtension); 
+
+            return $this->render('file_management/listPdf.html.twig', [
+                'message' => $message,
+                'dataPdf' => $dataPdf,
+                'pdfCount' => $pdfCount,
+            ]);
+        }
+
+        unlink($filePath);
+
+        $message = 'PDF supprimer avec success.';  
+        $dataPdf = $this->getListFile('pdf',$this->pdfExtension);
+        $pdfCount = $this->countFile('pdf',$this->pdfExtension); 
+
+        return $this->render('file_management/listPdf.html.twig', [
+            'message' => $message,
+            'dataPdf' => $dataPdf,
+            'pdfCount' => $pdfCount,
+        ]);
+    }
+
+    #[Route('/ajout/video', name: 'addVideo')]
+    public function addVideo(Request $request): Response
+    {
+        if ($request->isMethod('POST')) {
+            $file = $request->files->get('file');
+
+            if ($file instanceof UploadedFile) {
+                // $validExtensions = ['mp4','3gp'];
+                $fileName = $file->getClientOriginalName();
+                $fileExtension = $file->getClientOriginalExtension();
+                $videoCount = $this->countFile('video',$this->videoExtension);
+                if (in_array($fileExtension, $this->videoExtension)) {
+                    
+                    $imageDirectory = $this->getParameter('kernel.project_dir') . '/public/video';
+                    if (!file_exists($imageDirectory)) {
+                        mkdir($imageDirectory, 0777, true);
+                    }
+
+                    $name = $fileName;
+                    $fileWithPath = $imageDirectory."/".$name;
+                    
+                    if (file_exists($fileWithPath)) {
+                        $message = 'Le video existe deja';        
+                        $dataVideo = $this->getListFile('video',$this->videoExtension);
+                        $videoCount = $this->countFile('video',$this->videoExtension);
+
+                        return $this->render('file_management/addVideo.html.twig', [
+                            'dataVideo' => $dataVideo,
+                            'message' => $message,
+                            'videoCount' => $videoCount,
+                        ]);
+                    }else{
+                        $file->move($imageDirectory, $name);
+                        $message = 'Le video a été uploadée avec succès.';        
+                        $dataVideo = $this->getListFile('video',$this->videoExtension);
+                        $videoCount = $this->countFile('video',$this->videoExtension);
+
+                        return $this->render('file_management/addVideo.html.twig', [
+                            'dataVideo' => $dataVideo,
+                            'message' => $message,
+                            'videoCount' => $videoCount,
+                        ]);
+                    }
+                    
+                } else {
+                    $message = 'Le fichier sélectionné n\'est pas un video.';  
+
+                    return $this->render('file_management/addVideo.html.twig', [
+                        'message' => $message,
+                        'videoCount' => $videoCount,
+                    ]);
+                }
+
+            }
+        }
+
+        return $this->render('file_management/addVideo.html.twig');
+    }
+
+    #[Route('/list/video', name: 'listVideo')]
+    public function listVideo(): Response
+    {
+        $videoCount = $this->countFile('video',$this->videoExtension);       
+        $dataVideo = $this->getListFile('video',$this->videoExtension);       
+    
+        return $this->render('file_management/listVideo.html.twig', [
+            'dataVideo' => $dataVideo,
+            'videoCount' => $videoCount,
+        ]);
+        
+    }
+
+    #[Route('/download/video/{nameVideo}', name: 'downloadVideo')]
+    public function downloadVideo($nameVideo): Response
+    {
+        return $this->file('video/'.$nameVideo);
+    }
+
+    #[Route('/suppression/video/{nameVideo}', name: 'deleteVideo')]
+    public function deleteVideo($nameVideo): Response
+    {
+        $images = [];
+
+        $pdfDirectory = $this->getParameter('kernel.project_dir') . '/public/video';
+        $filePath = $pdfDirectory . '/' . $nameVideo;
+
+        if (!file_exists($filePath)) {
+            $message = 'Le video n\'existe pas.';  
+            $dataVideo = $this->getListFile('video',$this->videoExtension);
+            $videoCount = $this->countFile('video',$this->videoExtension); 
+
+            return $this->render('file_management/listVideo.html.twig', [
+                'message' => $message,
+                'dataVideo' => $dataVideo,
+                'videoCount' => $videoCount,
+            ]);
+        }
+
+        unlink($filePath);
+
+        $message = 'Video supprimer avec success.';  
+        $dataVideo = $this->getListFile('video',$this->videoExtension);
+        $videoCount = $this->countFile('video',$this->videoExtension); 
+
+        return $this->render('file_management/listVideo.html.twig', [
+            'message' => $message,
+            'dataVideo' => $dataVideo,
+            'videoCount' => $videoCount,
+        ]);
+    }
+
+    public function countFile($nameFolder,$extension)
+    {
+        $fileDirectory = $this->getParameter('kernel.project_dir') . '/public/'.$nameFolder;
+        $fileCount = 0;
+
+        if (is_dir($fileDirectory)) {
+            $files = scandir($fileDirectory);
             foreach ($files as $file) {
-                $filePath = $imageDirectory . '/' . $file;
-                if (is_file($filePath) && in_array(pathinfo($file, PATHINFO_EXTENSION), ['jpg', 'jpeg', 'png', 'gif'])) {
-                    $images[] = $file;
+                $filePath = $fileDirectory . '/' . $file;
+                if (is_file($filePath) && in_array(pathinfo($file, PATHINFO_EXTENSION), $extension)) {
+                    $fileCount++;
                 }
             }
         }
 
-        return $images;
+        return $fileCount;
     }
+
+    public function getListFile($nameFolder,$extension)
+    {
+        $fileDirectory = $this->getParameter('kernel.project_dir') . '/public/'.$nameFolder;
+        $dataFile = [];
+        
+        if (is_dir($fileDirectory)) {
+            $files = scandir($fileDirectory);
+            foreach ($files as $file) {
+                $filePath = $fileDirectory . '/' . $file;
+                if (is_file($filePath) && in_array(pathinfo($file, PATHINFO_EXTENSION), $extension)) {
+                    $dataFile[] = $file;
+                }
+            }
+        }
+
+        return $dataFile;
+    }
+
+    
+
 }

@@ -1,0 +1,27 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Hello FileManagementController!{% endblock %}
+
+{% block body %}
+<div class="row">   
+    <p>
+        Liste video {% if videoCount is defined %} ( {{ videoCount }} )  {% endif %} | 
+        <a href="{{ path('addVideo') }}">Ajout Nouveau</a> |
+        <a href="{{ path('acceuil') }}">Page d'acceuil</a>
+    </p>
+
+
+    {% if message is defined %}
+        <p>{{ message }}</p>
+    {% endif %}
+    <br>
+    {% if dataVideo is not empty %}
+        <h2>Liste des video :</h2>
+        <ul>
+            {% for video in dataVideo %}
+                <li><a href="{{ path('downloadVideo', {'nameVideo': video}) }}"> {{ video }} </a>| <a href="{{ path('deleteVideo', {'nameVideo': video}) }}">Supprimer</a></li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+</div>
+{% endblock %}

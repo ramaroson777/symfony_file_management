@@ -1,0 +1,27 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Hello FileManagementController!{% endblock %}
+
+{% block body %}
+<div class="row">   
+    <p>
+        Liste PDF {% if pdfCount is defined %} ( {{ pdfCount }} )  {% endif %}| 
+        <a href="{{ path('addPdf') }}">Ajout Nouveau</a> |
+        <a href="{{ path('acceuil') }}">Page d'acceuil</a>
+    </p>
+
+
+    {% if message is defined %}
+        <p>{{ message }}</p>
+    {% endif %}
+    <br>
+    {% if dataPdf is not empty %}
+        <h2>Liste des PDF :</h2>
+        <ul>
+            {% for pdf in dataPdf %}
+                <li><a href="{{ path('downloadPdf', {'namePdf': pdf}) }}"> {{ pdf }} </a>| <a href="{{ path('deletePdf', {'namePdf': pdf}) }}">Supprimer</a></li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+</div>
+{% endblock %}

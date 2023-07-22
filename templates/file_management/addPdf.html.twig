@@ -5,14 +5,14 @@
 {% block body %}
 <div>   
     <p>
-        Ajout Image | 
-        <a href="{{ path('listImage') }}">Liste des images</a> |
+        Ajout PDF | 
+        <a href="{{ path('listPdf') }}">Liste PDF</a> |
         <a href="{{ path('acceuil') }}">Page d'acceuil</a>
     </p>
     {% if message is defined %}
         <p>{{ message }}</p>
     {% endif %}
-    <form action="{{ path('addImage') }}" method="post" enctype="multipart/form-data">
+    <form action="{{ path('addPdf') }}" method="post" enctype="multipart/form-data">
         <input type="file" name="file" id="file">
         <button type="submit">Upload</button>
     </form>
